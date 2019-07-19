@@ -55,25 +55,16 @@ func set_car(car_node):
 func _on_car_moved(new_pos : Vector3):
 	var chunk_pos = Vector2(global_transform.origin.x, global_transform.origin.z)
 	var distance = Vector2(new_pos.x, new_pos.z).distance_to(chunk_pos)
-	if distance < chunk_size/2:
-		set_collision(true)
-		set_lod(LOD.HIGH)
-		set_visible(true)
-	elif distance < chunk_size:
-		set_collision(true)
-		set_lod(LOD.MEDIUM)
-		set_visible(true)
+	var lod
+	if distance < chunk_size:
+		lod = LOD.HIGH
 	elif distance < chunk_size*2:
-		set_collision(false)
-		set_lod(LOD.MEDIUM)
-		set_visible(true)
+		lod = LOD.MEDIUM
 	elif distance < chunk_size*4:
-		set_collision(false)
-		set_lod(LOD.LOW)
-		set_visible(true)
-	else:
-		set_collision(false)
-		set_visible(false)
+		lod = LOD.LOW
+	set_lod(lod)
+	set_collision(distance < chunk_size)
+	set_visible(distance < chunk_size*5)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
