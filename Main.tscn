@@ -1,0 +1,173 @@
+[gd_scene load_steps=15 format=2]
+
+[ext_resource path="res://Camera.gd" type="Script" id=1]
+[ext_resource path="res://Car.gd" type="Script" id=2]
+[ext_resource path="res://Ground.gd" type="Script" id=3]
+[ext_resource path="res://groundnoise.tres" type="OpenSimplexNoise" id=4]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 1.97531, 0.420637, 1.15625 )
+
+[sub_resource type="CubeMesh" id=2]
+size = Vector3( 4, 0.8, 2.3 )
+subdivide_width = 2
+subdivide_depth = 2
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.831373, 0.278431, 0.964706, 1 )
+metallic = 0.68
+roughness = 0.2
+clearcoat_enabled = true
+clearcoat = 1.0
+clearcoat_gloss = 0.5
+
+[sub_resource type="CapsuleShape" id=4]
+radius = 0.8
+
+[sub_resource type="CapsuleMesh" id=5]
+radius = 0.8
+
+[sub_resource type="SpatialMaterial" id=6]
+flags_transparent = true
+params_line_width = 0.1
+albedo_color = Color( 0.407843, 0.545098, 0.588235, 1 )
+roughness = 0.1
+transmission_enabled = true
+transmission = Color( 0.945098, 0.945098, 0.945098, 1 )
+
+[sub_resource type="SpatialMaterial" id=7]
+albedo_color = Color( 0.239216, 0.239216, 0.231373, 1 )
+roughness = 0.96
+
+[sub_resource type="CylinderMesh" id=8]
+material = SubResource( 7 )
+top_radius = 0.4
+bottom_radius = 0.4
+height = 0.25
+radial_segments = 32
+rings = 1
+
+[sub_resource type="ProceduralSky" id=9]
+
+[sub_resource type="Environment" id=10]
+background_mode = 2
+background_sky = SubResource( 9 )
+ambient_light_color = Color( 0.266667, 0.266667, 0.266667, 1 )
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( -4.37114e-08, -0.34202, 0.939693, 0, 0.939693, 0.34202, -1, 1.49502e-08, -4.10753e-08, 10, 6.00006, -8.74228e-07 )
+script = ExtResource( 1 )
+follow_this_path = NodePath("../Car")
+target_distance = Vector3( -23, 20, 0 )
+
+[node name="Car" type="VehicleBody" parent="."]
+editor/display_folded = true
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.72268, 0 )
+mass = 700.0
+script = ExtResource( 2 )
+MAX_ENGINE_FORCE = 500.0
+steer_speed = 4.0
+brake_mult = 5.0
+
+[node name="Position3D" type="Position3D" parent="Car"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Car"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0715621, 0.127545, -6.25615e-09 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="Car/CollisionShape"]
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="CollisionShape2" type="CollisionShape" parent="Car"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.479043, 0.555934, -4.18793e-08 )
+shape = SubResource( 4 )
+
+[node name="MeshInstance2" type="MeshInstance" parent="Car/CollisionShape2"]
+mesh = SubResource( 5 )
+material/0 = SubResource( 6 )
+
+[node name="front_right" type="VehicleWheel" parent="Car"]
+editor/display_folded = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.28408, -0.198714, 1.09973 )
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.4
+wheel_radius = 0.4
+wheel_rest_length = 0.2
+suspension_travel = 0.2
+suspension_stiffness = 70.0
+damping_compression = 2.0
+damping_relaxation = 4.0
+
+[node name="MeshInstance" type="MeshInstance" parent="Car/front_right"]
+transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="front_left" type="VehicleWheel" parent="Car"]
+editor/display_folded = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.28408, -0.198714, -1.1 )
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.4
+wheel_radius = 0.4
+wheel_rest_length = 0.2
+suspension_travel = 0.2
+suspension_stiffness = 70.0
+damping_compression = 2.0
+damping_relaxation = 4.0
+
+[node name="MeshInstance" type="MeshInstance" parent="Car/front_left"]
+transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="back_right" type="VehicleWheel" parent="Car"]
+editor/display_folded = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -1.48047, -0.198714, 1.09973 )
+use_as_traction = true
+wheel_roll_influence = 0.2
+wheel_radius = 0.4
+wheel_rest_length = 0.2
+suspension_travel = 0.2
+suspension_stiffness = 50.0
+damping_compression = 3.0
+damping_relaxation = 5.0
+
+[node name="MeshInstance" type="MeshInstance" parent="Car/back_right"]
+transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="back_left" type="VehicleWheel" parent="Car"]
+editor/display_folded = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -1.48047, -0.198714, -1.1 )
+use_as_traction = true
+wheel_roll_influence = 0.2
+wheel_radius = 0.4
+wheel_rest_length = 0.2
+suspension_travel = 0.2
+suspension_stiffness = 50.0
+damping_compression = 3.0
+damping_relaxation = 5.0
+
+[node name="MeshInstance" type="MeshInstance" parent="Car/back_left"]
+transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 10 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( -0.712488, 0.405643, -0.572551, 0.277602, 0.912347, 0.300931, 0.644436, 0.0554688, -0.762644, 0, 23.1424, 0 )
+
+[node name="Ground" type="Spatial" parent="."]
+script = ExtResource( 3 )
+ground_noise = ExtResource( 4 )
+ground_noise_scale = 0.1
+chunk_size = 24
+car_node = NodePath("../Car")
