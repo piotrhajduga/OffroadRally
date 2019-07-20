@@ -169,5 +169,4 @@ transform = Transform( -0.712488, 0.405643, -0.572551, 0.277602, 0.912347, 0.300
 script = ExtResource( 3 )
 ground_noise = ExtResource( 4 )
 ground_noise_scale = 0.1
-chunk_size = 24
 car_node = NodePath("../Car")

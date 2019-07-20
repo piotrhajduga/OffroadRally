@@ -27,7 +27,7 @@ export var max_height = 8.0 setget set_max_height
 
 func set_max_height(height):
 	max_height = height
-	call_deferred("_update_children")
+	call_deferred("_recreate_chunks")
 
 var chunks_mutex = Mutex.new()
 var chunks = {}
@@ -42,7 +42,7 @@ func create_chunk(chunk_pos):
 	return chunk
 
 func _recreate_chunks():
-	for chunk in chunks.values():
+	for chunk in get_children():
 		if chunk == null: continue
 		remove_child(chunk)
 		chunk.remove_and_skip()
@@ -104,8 +104,8 @@ var car_chunk = Vector2()
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if Engine.editor_hint:
-		ground_noise.connect("changed", self, "_update_children")
-		call_deferred("_create_chunks")
+		ground_noise.connect("changed", self, "_recreate_chunks")
+		call_deferred("_recreate_chunks")
 	else:
 		car = get_node(car_node)
 		call_deferred("_create_chunks")
