@@ -1,12 +1,25 @@
 tool
 extends StaticBody
 
+export(Material) var material setget set_material
+
+func set_material(material_in):
+	material = material_in
+	if Engine.editor_hint:
+		call_deferred("_update_material")
+
+func _update_material():
+	$HighLOD.material_override = material
+	$MediumLOD.material_override = material
+	$LowLOD.material_override = material
+
 export(OpenSimplexNoise) var noise setget set_noise
 
 func set_noise(noise_in):
 	noise = noise_in
 	if Engine.editor_hint:
 		call_deferred("_update")
+		noise.connect("changed", self, "_update", [], CONNECT_DEFERRED)
 
 export(float) var noise_scale = 1.0 setget set_noise_scale
 
@@ -79,6 +92,7 @@ func _ready():
 
 func _update():
 	create_lods()
+	_update_material()
 	update_chunk()
 
 func update_chunk():
@@ -115,6 +129,7 @@ class LodMeshBuilder:
 	var uv_arr = PoolVector2Array()
 	var vertex_arr = PoolVector3Array()
 	var index_arr = PoolIntArray()
+	var tangent_arr = PoolRealArray()
 	
 	func _init(chunk_size_in : float, noise_in : OpenSimplexNoise, noise_scale_in : float, max_height_in : float):
 		chunk_size = chunk_size_in
@@ -137,6 +152,7 @@ class LodMeshBuilder:
 		arrays[Mesh.ARRAY_TEX_UV] = uv_arr
 		arrays[Mesh.ARRAY_VERTEX] = vertex_arr
 		arrays[Mesh.ARRAY_INDEX] = index_arr
+		arrays[Mesh.ARRAY_TANGENT] = tangent_arr
 		
 		var mesh = ArrayMesh.new()
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
@@ -145,20 +161,27 @@ class LodMeshBuilder:
 	func set_height_and_normal(idx : int):
 		var point3d = vertex_arr[idx] + origin
 		var point = Vector2(point3d.x, point3d.z)
-		var offset = (chunk_size / subdivision) / 20
-		var offset1 = Vector2.UP * offset
-		var offset2 = Vector2.RIGHT * offset
+		
+		var offset = (chunk_size / subdivision) / 10
+		var offset1 = (Vector2.UP+Vector2.RIGHT).normalized() * offset + point
+		var offset2 = (Vector2.UP+Vector2.LEFT).normalized() * offset + point
 		
 		var noise_probe = point * noise_scale
 		vertex_arr[idx].y = max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y)
 		
 		var point0 = vertex_arr[idx]
 		noise_probe = offset1 * noise_scale
-		var point1 = Vector3(point.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), point.y)
+		var point1 = Vector3(offset1.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), offset1.y)
 		noise_probe = offset2 * noise_scale
-		var point2 = Vector3(point.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), point.y)
+		var point2 = Vector3(offset1.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), offset1.y)
 		
 		normal_arr[idx] = (point1-point0).cross(point2-point0).normalized()
+		
+		var tangent = (point2-point0).normalized()
+		tangent_arr.append(tangent.x)
+		tangent_arr.append(tangent.y)
+		tangent_arr.append(tangent.z)
+		tangent_arr.append(1)
 	
 	func fill_arrays():
 		var offset = Vector3(-chunk_size/2, 0, -chunk_size/2)

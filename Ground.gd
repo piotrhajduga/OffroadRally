@@ -3,6 +3,13 @@ extends Spatial
 
 var GroundChunk = preload("res://GroundChunk.tscn")
 
+export(Material) var material setget set_material
+
+func set_material(material_in):
+	material = material_in
+	for child in get_children():
+		child.set_material(material)
+
 export (OpenSimplexNoise) var ground_noise setget set_ground_noise
 
 func set_ground_noise(ground_noise_in):
@@ -38,6 +45,7 @@ func create_chunk(chunk_pos):
 	chunk.set_noise_scale(ground_noise_scale)
 	chunk.set_chunk_size(chunk_size)
 	chunk.set_max_height(max_height)
+	chunk.set_material(material)
 	chunk.translate(Vector3(chunk_pos.x,0.0,chunk_pos.y))
 	return chunk
 

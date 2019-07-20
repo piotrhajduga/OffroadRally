@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Camera.gd" type="Script" id=1]
 [ext_resource path="res://Car.gd" type="Script" id=2]
@@ -53,6 +53,10 @@ rings = 1
 background_mode = 2
 background_sky = SubResource( 9 )
 ambient_light_color = Color( 0.266667, 0.266667, 0.266667, 1 )
+
+[sub_resource type="SpatialMaterial" id=11]
+flags_ensure_correct_normals = true
+albedo_color = Color( 0.572549, 0.545098, 0.47451, 1 )
 
 [node name="Spatial" type="Spatial"]
 
@@ -163,10 +167,12 @@ material/0 = null
 environment = SubResource( 10 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( -0.712488, 0.405643, -0.572551, 0.277602, 0.912347, 0.300931, 0.644436, 0.0554688, -0.762644, 0, 23.1424, 0 )
+transform = Transform( -0.356183, 0.388661, -0.849751, 0.277602, 0.912347, 0.300932, 0.892228, -0.128706, -0.432856, 0, 23.1424, 0 )
 
 [node name="Ground" type="Spatial" parent="."]
 script = ExtResource( 3 )
+material = SubResource( 11 )
 ground_noise = ExtResource( 4 )
 ground_noise_scale = 0.1
+chunk_size = 8
 car_node = NodePath("../Car")
