@@ -83,6 +83,9 @@ func _on_car_moved(new_pos : Vector3):
 	call_deferred("update_chunk")
 
 # Called when the node enters the scene tree for the first time.
+
+var lmb : LodMeshBuilder
+
 func _ready():
 	if Engine.editor_hint:
 		call_deferred("_update")
@@ -94,6 +97,7 @@ func _ready():
 #	pass
 
 func _update():
+	lmb = LodMeshBuilder.new(chunk_size, noise, noise_scale, max_height)
 	create_lods()
 	_update_material()
 	update_chunk()
@@ -116,10 +120,11 @@ func update_chunk():
 	$CollisionShape.set_visible(collision)
 
 func create_lods():
-	var mesh = get_lod_mesh(2)
-	$HighLOD.set_mesh(get_lod_mesh(1))
+	var origin = global_transform.origin
+	var mesh = lmb.build(origin, 2)
+	$HighLOD.set_mesh(lmb.build(origin, 1))
 	$MediumLOD.set_mesh(mesh)
-	$LowLOD.set_mesh(get_lod_mesh(4))
+	$LowLOD.set_mesh(lmb.build(origin, 4))
 	$CollisionShape.set_shape(mesh.create_trimesh_shape())
 
 class LodMeshBuilder:
@@ -163,20 +168,24 @@ class LodMeshBuilder:
 		var point3d = vertex_arr[idx] + origin
 		var point = Vector2(point3d.x, point3d.z)
 		
-		var offset = chunk_size / float(subdivision) / 5
-		var offset1 = (Vector2.UP+Vector2.RIGHT).normalized() * offset + point
-		var offset2 = (Vector2.UP+Vector2.LEFT).normalized() * offset + point
+		vertex_arr[idx].y = get_height(point)
 		
-		var noise_probe = point * noise_scale
-		vertex_arr[idx].y = max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y)
+		var offset = chunk_size / subdivision / 20
 		
-		var point0 = vertex_arr[idx]
-		noise_probe = offset1 * noise_scale
-		var point1 = Vector3(offset1.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), offset1.y)
-		noise_probe = offset2 * noise_scale
-		var point2 = Vector3(offset1.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), offset1.y)
+		var offset0 = Vector2.LEFT * offset + point
+		var point0 = Vector3(offset0.x, get_height(offset0), offset0.y)
+		
+		var offset1 = (Vector2.DOWN+Vector2.RIGHT).normalized() * offset + point
+		var point1 = Vector3(offset1.x, get_height(offset1), offset1.y)
+		
+		var offset2 = (Vector2.UP+Vector2.RIGHT).normalized() * offset + point
+		var point2 = Vector3(offset2.x, get_height(offset2), offset2.y)
 		
 		normal_arr[idx] = (point1-point0).cross(point2-point0).normalized()
+	
+	func get_height(point : Vector2):
+		var noise_probe = point * noise_scale
+		return max_height * noise.get_noise_2dv(noise_probe)
 	
 	func fill_arrays():
 		var offset = Vector3(-chunk_size/2, 0, -chunk_size/2)
@@ -242,7 +251,3 @@ class LodMeshBuilder:
 				back_new_index_arr[ix1] = vertex_idx
 				index_arr.append(back_new_index_arr[ix1])
 			back_index_arr = back_new_index_arr
-
-func get_lod_mesh(subdivision):
-	var lmb = LodMeshBuilder.new(chunk_size, noise, noise_scale, max_height)
-	return lmb.build(global_transform.origin, subdivision)
