@@ -47,7 +47,8 @@ export (LOD) var lod = LOD.HIGH setget set_lod
 
 func set_lod(lod_in):
 	lod = lod_in
-	call_deferred("update_chunk")
+	if Engine.editor_hint:
+		call_deferred("update_chunk")
 
 const MARGIN = Vector2(0.1,0.1)
 
@@ -55,7 +56,8 @@ export var collision = true setget set_collision
 
 func set_collision(collision_in):
 	collision = collision_in
-	call_deferred("update_chunk")
+	if Engine.editor_hint:
+		call_deferred("update_chunk")
 
 var car : Node setget set_car
 
@@ -78,6 +80,7 @@ func _on_car_moved(new_pos : Vector3):
 	set_lod(lod)
 	set_collision(distance < chunk_size)
 	set_visible(distance < chunk_size*5)
+	call_deferred("update_chunk")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -129,7 +132,6 @@ class LodMeshBuilder:
 	var uv_arr = PoolVector2Array()
 	var vertex_arr = PoolVector3Array()
 	var index_arr = PoolIntArray()
-	var tangent_arr = PoolRealArray()
 	
 	func _init(chunk_size_in : float, noise_in : OpenSimplexNoise, noise_scale_in : float, max_height_in : float):
 		chunk_size = chunk_size_in
@@ -152,7 +154,6 @@ class LodMeshBuilder:
 		arrays[Mesh.ARRAY_TEX_UV] = uv_arr
 		arrays[Mesh.ARRAY_VERTEX] = vertex_arr
 		arrays[Mesh.ARRAY_INDEX] = index_arr
-		arrays[Mesh.ARRAY_TANGENT] = tangent_arr
 		
 		var mesh = ArrayMesh.new()
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
@@ -162,7 +163,7 @@ class LodMeshBuilder:
 		var point3d = vertex_arr[idx] + origin
 		var point = Vector2(point3d.x, point3d.z)
 		
-		var offset = (chunk_size / subdivision) / 10
+		var offset = chunk_size / float(subdivision) / 5
 		var offset1 = (Vector2.UP+Vector2.RIGHT).normalized() * offset + point
 		var offset2 = (Vector2.UP+Vector2.LEFT).normalized() * offset + point
 		
@@ -176,12 +177,6 @@ class LodMeshBuilder:
 		var point2 = Vector3(offset1.x, max_height * noise.get_noise_2d(noise_probe.x, noise_probe.y), offset1.y)
 		
 		normal_arr[idx] = (point1-point0).cross(point2-point0).normalized()
-		
-		var tangent = (point2-point0).normalized()
-		tangent_arr.append(tangent.x)
-		tangent_arr.append(tangent.y)
-		tangent_arr.append(tangent.z)
-		tangent_arr.append(1)
 	
 	func fill_arrays():
 		var offset = Vector3(-chunk_size/2, 0, -chunk_size/2)

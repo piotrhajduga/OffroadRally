@@ -67,7 +67,6 @@ follow_this_path = NodePath("../Car")
 target_distance = Vector3( -23, 20, 0 )
 
 [node name="Car" type="VehicleBody" parent="."]
-editor/display_folded = true
 transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.72268, 0 )
 mass = 700.0
 script = ExtResource( 2 )
@@ -174,5 +173,4 @@ script = ExtResource( 3 )
 material = SubResource( 11 )
 ground_noise = ExtResource( 4 )
 ground_noise_scale = 0.1
-chunk_size = 8
 car_node = NodePath("../Car")

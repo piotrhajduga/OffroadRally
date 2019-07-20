@@ -7,8 +7,9 @@ export(Material) var material setget set_material
 
 func set_material(material_in):
 	material = material_in
-	for child in get_children():
-		child.set_material(material)
+	if Engine.editor_hint:
+		for child in get_children():
+			child.set_material(material)
 
 export (OpenSimplexNoise) var ground_noise setget set_ground_noise
 
@@ -130,7 +131,8 @@ func _exit_tree():
 	chunk_creator_queue.push_front(null)
 	chunk_creator_mutex.unlock()
 	chunk_creator_semaphore.post()
-	chunk_creator_thread.wait_to_finish()
+	if chunk_creator_thread != null:
+		chunk_creator_thread.wait_to_finish()
 
 func _physics_process(delta):
 	if not Engine.editor_hint:
