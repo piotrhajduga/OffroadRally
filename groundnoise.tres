@@ -1,8 +1,8 @@
 [gd_resource type="OpenSimplexNoise" format=2]
 
 [resource]
-seed = 1337
+seed = 9876
 octaves = 6
-period = 166.4
-persistence = 0.91
-lacunarity = 2.76
+period = 211.0
+persistence = 0.97
+lacunarity = 1.76

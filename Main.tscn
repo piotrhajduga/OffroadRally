@@ -1,60 +1,45 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://Camera.gd" type="Script" id=1]
 [ext_resource path="res://Car.gd" type="Script" id=2]
-[ext_resource path="res://Ground.gd" type="Script" id=3]
-[ext_resource path="res://groundnoise.tres" type="OpenSimplexNoise" id=4]
+[ext_resource path="res://assets/Chevrolet_Camaro_SS.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/Chevrolet_Camaro_SS_front_wheel.obj" type="ArrayMesh" id=4]
+[ext_resource path="res://assets/Chevrolet_Camaro_SS_back_wheel.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://Ground.gd" type="Script" id=6]
+[ext_resource path="res://groundnoise.tres" type="OpenSimplexNoise" id=7]
+
+[sub_resource type="SpatialMaterial" id=8]
+albedo_color = Color( 0.415686, 0.411765, 0.403922, 1 )
+metallic = 1.0
+metallic_specular = 0.23
+roughness = 0.98
+
+[sub_resource type="PlaneMesh" id=9]
+size = Vector2( 4.5, 1.25 )
+
+[sub_resource type="PlaneMesh" id=10]
+size = Vector2( 2.12, 0.4 )
 
 [sub_resource type="BoxShape" id=1]
-extents = Vector3( 1.97531, 0.420637, 1.15625 )
+extents = Vector3( 1.45243, 0.391236, 1.02317 )
 
-[sub_resource type="CubeMesh" id=2]
-size = Vector3( 4, 0.8, 2.3 )
-subdivide_width = 2
-subdivide_depth = 2
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 0.77047, 0.25136, 0.721779 )
 
-[sub_resource type="SpatialMaterial" id=3]
-albedo_color = Color( 0.831373, 0.278431, 0.964706, 1 )
-metallic = 0.68
-roughness = 0.2
-clearcoat_enabled = true
-clearcoat = 1.0
-clearcoat_gloss = 0.5
+[sub_resource type="BoxShape" id=3]
+extents = Vector3( 0.933408, 0.2343, 0.69523 )
 
-[sub_resource type="CapsuleShape" id=4]
-radius = 0.8
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 1, 0.231639, 0.920322 )
 
-[sub_resource type="CapsuleMesh" id=5]
-radius = 0.8
+[sub_resource type="ProceduralSky" id=5]
 
-[sub_resource type="SpatialMaterial" id=6]
-flags_transparent = true
-params_line_width = 0.1
-albedo_color = Color( 0.407843, 0.545098, 0.588235, 1 )
-roughness = 0.1
-transmission_enabled = true
-transmission = Color( 0.945098, 0.945098, 0.945098, 1 )
-
-[sub_resource type="SpatialMaterial" id=7]
-albedo_color = Color( 0.239216, 0.239216, 0.231373, 1 )
-roughness = 0.96
-
-[sub_resource type="CylinderMesh" id=8]
-material = SubResource( 7 )
-top_radius = 0.4
-bottom_radius = 0.4
-height = 0.25
-radial_segments = 32
-rings = 1
-
-[sub_resource type="ProceduralSky" id=9]
-
-[sub_resource type="Environment" id=10]
+[sub_resource type="Environment" id=6]
 background_mode = 2
-background_sky = SubResource( 9 )
+background_sky = SubResource( 5 )
 ambient_light_color = Color( 0.266667, 0.266667, 0.266667, 1 )
 
-[sub_resource type="SpatialMaterial" id=11]
+[sub_resource type="SpatialMaterial" id=7]
 flags_ensure_correct_normals = true
 albedo_color = Color( 0.572549, 0.545098, 0.47451, 1 )
 
@@ -62,116 +47,186 @@ albedo_color = Color( 0.572549, 0.545098, 0.47451, 1 )
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( -4.37114e-08, -0.34202, 0.939693, 0, 0.939693, 0.34202, -1, 1.49502e-08, -4.10753e-08, 10, 6.00006, -8.74228e-07 )
+fov = 60.0
 script = ExtResource( 1 )
 follow_this_path = NodePath("../Car")
 target_distance = Vector3( -23, 20, 0 )
+camera_speed = 3.0
 
 [node name="Car" type="VehicleBody" parent="."]
 editor/display_folded = true
-transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.72268, 0 )
-mass = 700.0
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.17214, 0 )
+input_ray_pickable = false
+mass = 1100.0
 script = ExtResource( 2 )
-MAX_ENGINE_FORCE = 500.0
+MAX_ENGINE_FORCE = 700.0
+MAX_BRAKE_FORCE = 50.0
+MAX_STEER_ANGLE = 0.45
 steer_speed = 4.0
-brake_mult = 5.0
 
 [node name="Position3D" type="Position3D" parent="Car"]
 
+[node name="MeshInstance" type="MeshInstance" parent="Car/Position3D"]
+transform = Transform( 1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, -0.521854, 0, -4.5622e-08 )
+material_override = SubResource( 8 )
+cast_shadow = 2
+mesh = SubResource( 9 )
+material/0 = null
+
+[node name="MeshInstanceLeft" type="MeshInstance" parent="Car/Position3D"]
+transform = Transform( 1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, -0.521854, 0, -0.749939 )
+material_override = SubResource( 8 )
+cast_shadow = 2
+mesh = SubResource( 10 )
+material/0 = null
+
+[node name="MeshInstanceRight" type="MeshInstance" parent="Car/Position3D"]
+transform = Transform( 1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, -0.522, 0, 0.75 )
+material_override = SubResource( 8 )
+cast_shadow = 2
+mesh = SubResource( 10 )
+material/0 = null
+
+[node name="Chevrolet_Camaro_SS" type="MeshInstance" parent="Car"]
+transform = Transform( -0.56, 0, 8.45576e-08, 0, 0.56, 0, -8.45576e-08, 0, -0.56, -0.696871, 0.243286, -6.09224e-08 )
+cast_shadow = 2
+extra_cull_margin = 0.1
+mesh = ExtResource( 3 )
+material/0 = null
+material/1 = null
+material/2 = null
+material/3 = null
+material/4 = null
+material/5 = null
+material/6 = null
+material/7 = null
+material/8 = null
+material/9 = null
+material/10 = null
+material/11 = null
+material/12 = null
+material/13 = null
+material/14 = null
+material/15 = null
+material/16 = null
+material/17 = null
+material/18 = null
+material/19 = null
+material/20 = null
+material/21 = null
+material/22 = null
+
 [node name="CollisionShape" type="CollisionShape" parent="Car"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0715621, 0.127545, -6.25615e-09 )
+transform = Transform( 0.999905, 0.0138161, -8.34177e-12, -0.0138161, 0.999905, -1.20784e-09, -8.34177e-12, 1.20784e-09, 1, -0.778382, 0.175718, -6.80483e-08 )
 shape = SubResource( 1 )
 
-[node name="MeshInstance" type="MeshInstance" parent="Car/CollisionShape"]
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
-
 [node name="CollisionShape2" type="CollisionShape" parent="Car"]
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.479043, 0.555934, -4.18793e-08 )
-shape = SubResource( 4 )
+transform = Transform( -4.3694e-08, -0.0163093, 0.999867, -2.13871e-09, 0.999867, 0.0163093, -1, -1.4258e-09, -4.3723e-08, -0.953982, 0.687316, -8.33998e-08 )
+shape = SubResource( 2 )
 
-[node name="MeshInstance2" type="MeshInstance" parent="Car/CollisionShape2"]
-mesh = SubResource( 5 )
-material/0 = SubResource( 6 )
+[node name="CollisionShape3" type="CollisionShape" parent="Car"]
+transform = Transform( -4.22115e-08, 0.150817, 0.988562, 1.97772e-08, 0.988562, -0.150817, -1, 1.31849e-08, -4.47113e-08, 1.24638, 0.179974, 1.08962e-07 )
+shape = SubResource( 3 )
+
+[node name="CollisionShape4" type="CollisionShape" parent="Car"]
+transform = Transform( -3.67454e-08, -0.321592, 0.946878, -4.21717e-08, 0.946878, 0.321592, -1, -2.81145e-08, -4.83554e-08, -2.46723, 0.411094, -2.15692e-07 )
+shape = SubResource( 4 )
 
 [node name="front_right" type="VehicleWheel" parent="Car"]
 editor/display_folded = true
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.28408, -0.198714, 1.09973 )
-use_as_traction = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.106, -0.181482, 0.91 )
 use_as_steering = true
 wheel_roll_influence = 0.4
-wheel_radius = 0.4
+wheel_radius = 0.35
 wheel_rest_length = 0.2
-suspension_travel = 0.2
+suspension_travel = 0.35
 suspension_stiffness = 70.0
+suspension_max_force = 10000.0
 damping_compression = 2.0
 damping_relaxation = 4.0
 
-[node name="MeshInstance" type="MeshInstance" parent="Car/front_right"]
-transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
-mesh = SubResource( 8 )
+[node name="Chevrolet_Camaro_SS_front_wheel" type="MeshInstance" parent="Car/front_right"]
+transform = Transform( -2.44784e-08, 0, -0.56, 0, 0.56, 0, 0.56, 0, -2.44784e-08, -0.15, 0, 0 )
+mesh = ExtResource( 4 )
 material/0 = null
+material/1 = null
+material/2 = null
 
 [node name="front_left" type="VehicleWheel" parent="Car"]
 editor/display_folded = true
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.28408, -0.198714, -1.1 )
-use_as_traction = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.106, -0.181482, -0.91 )
 use_as_steering = true
 wheel_roll_influence = 0.4
-wheel_radius = 0.4
+wheel_radius = 0.35
 wheel_rest_length = 0.2
-suspension_travel = 0.2
+suspension_travel = 0.35
 suspension_stiffness = 70.0
+suspension_max_force = 10000.0
 damping_compression = 2.0
 damping_relaxation = 4.0
 
-[node name="MeshInstance" type="MeshInstance" parent="Car/front_left"]
-transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
-mesh = SubResource( 8 )
+[node name="Chevrolet_Camaro_SS_front_wheel" type="MeshInstance" parent="Car/front_left"]
+transform = Transform( -2.44784e-08, 0, 0.56, 0, 0.56, 0, -0.56, 0, -2.44784e-08, 0.15, 0, 0 )
+mesh = ExtResource( 4 )
 material/0 = null
+material/1 = null
+material/2 = null
 
 [node name="back_right" type="VehicleWheel" parent="Car"]
 editor/display_folded = true
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -1.48047, -0.198714, 1.09973 )
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -2.137, -0.128929, 0.9 )
 use_as_traction = true
 wheel_roll_influence = 0.2
 wheel_radius = 0.4
 wheel_rest_length = 0.2
-suspension_travel = 0.2
+suspension_travel = 0.28
 suspension_stiffness = 50.0
+suspension_max_force = 10000.0
 damping_compression = 3.0
 damping_relaxation = 5.0
 
-[node name="MeshInstance" type="MeshInstance" parent="Car/back_right"]
-transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
-mesh = SubResource( 8 )
+[node name="Chevrolet_Camaro_SS_back_wheel" type="MeshInstance" parent="Car/back_right"]
+transform = Transform( -2.44784e-08, 0, -0.56, 0, 0.56, 0, 0.56, 0, -2.44784e-08, -0.2, 0, 0 )
+mesh = ExtResource( 5 )
 material/0 = null
+material/1 = null
+material/2 = null
 
 [node name="back_left" type="VehicleWheel" parent="Car"]
 editor/display_folded = true
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -1.48047, -0.198714, -1.1 )
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -2.137, -0.128929, -0.9 )
 use_as_traction = true
 wheel_roll_influence = 0.2
 wheel_radius = 0.4
 wheel_rest_length = 0.2
-suspension_travel = 0.2
+suspension_travel = 0.28
 suspension_stiffness = 50.0
+suspension_max_force = 10000.0
 damping_compression = 3.0
 damping_relaxation = 5.0
 
-[node name="MeshInstance" type="MeshInstance" parent="Car/back_left"]
-transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 5.96046e-08, 0, 0 )
-mesh = SubResource( 8 )
+[node name="Chevrolet_Camaro_SS_back_wheel" type="MeshInstance" parent="Car/back_left"]
+transform = Transform( -2.44784e-08, 0, 0.56, 0, 0.56, 0, -0.56, 0, -2.44784e-08, 0.2, 0, 0 )
+mesh = ExtResource( 5 )
 material/0 = null
+material/1 = null
+material/2 = null
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 10 )
+environment = SubResource( 6 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( -0.356183, 0.388661, -0.849751, 0.277602, 0.912347, 0.300932, 0.892228, -0.128706, -0.432856, 0, 23.1424, 0 )
+transform = Transform( 0.371667, 0.64672, -0.666046, 0.469077, 0.488301, 0.735887, 0.801143, -0.585931, -0.121876, 0, 23.1424, 0 )
+light_indirect_energy = 0.5
+shadow_enabled = true
+shadow_bias = 0.0
+shadow_reverse_cull_face = true
 
 [node name="Ground" type="Spatial" parent="."]
-script = ExtResource( 3 )
-material = SubResource( 11 )
-ground_noise = ExtResource( 4 )
-ground_noise_scale = 0.1
+script = ExtResource( 6 )
+material = SubResource( 7 )
+ground_noise = ExtResource( 7 )
+ground_noise_scale = 0.4
+chunk_size = 20
+max_height = 32.0
 car_node = NodePath("../Car")

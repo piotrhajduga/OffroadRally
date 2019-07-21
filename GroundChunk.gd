@@ -1,6 +1,8 @@
 tool
 extends StaticBody
 
+signal destroy
+
 export(Material) var material setget set_material
 
 func set_material(material_in):
@@ -19,7 +21,8 @@ func set_noise(noise_in):
 	noise = noise_in
 	if Engine.editor_hint:
 		call_deferred("_update")
-		noise.connect("changed", self, "_update", [], CONNECT_DEFERRED)
+		if !noise.is_connected("changed", self, "_update"):
+			noise.connect("changed", self, "_update", [], CONNECT_DEFERRED)
 
 export(float) var noise_scale = 1.0 setget set_noise_scale
 
@@ -67,16 +70,29 @@ func set_car(car_node):
 		car.connect("car_moved", self, "_on_car_moved")
 		call_deferred("_on_car_moved", car.global_transform.origin)
 
+var chunk_pos : Vector2 setget set_chunk_pos, get_chunk_pos
+
+func set_chunk_pos(new_pos : Vector2):
+	if new_pos == null:
+		return
+	chunk_pos = new_pos
+	if Engine.editor_hint:
+		call_deferred("_update")
+
+func get_chunk_pos():
+	return chunk_pos
+
 func _on_car_moved(new_pos : Vector3):
-	var chunk_pos = Vector2(global_transform.origin.x, global_transform.origin.z)
 	var distance = Vector2(new_pos.x, new_pos.z).distance_to(chunk_pos)
 	var lod
 	if distance < chunk_size:
 		lod = LOD.HIGH
 	elif distance < chunk_size*2:
 		lod = LOD.MEDIUM
-	elif distance < chunk_size*4:
+	elif distance < chunk_size*5:
 		lod = LOD.LOW
+	elif distance > chunk_size*6:
+		emit_signal("destroy", self)
 	set_lod(lod)
 	set_collision(distance < chunk_size)
 	set_visible(distance < chunk_size*5)
@@ -92,11 +108,12 @@ func _ready():
 	else:
 		_update()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _exit_tree():
+	if Engine.editor_hint and noise != null:
+		noise.disconnect("changed", self, "_update")
 
 func _update():
+	global_transform.origin = Vector3(chunk_pos.x, 0, chunk_pos.y)
 	lmb = LodMeshBuilder.new(chunk_size, noise, noise_scale, max_height)
 	create_lods()
 	_update_material()
@@ -120,7 +137,7 @@ func update_chunk():
 	$CollisionShape.set_visible(collision)
 
 func create_lods():
-	var origin = global_transform.origin
+	var origin = Vector3(chunk_pos.x, 0, chunk_pos.y)
 	var mesh = lmb.build(origin, 2)
 	$HighLOD.set_mesh(lmb.build(origin, 1))
 	$MediumLOD.set_mesh(mesh)

@@ -47,15 +47,12 @@ func create_chunk(chunk_pos):
 	chunk.set_chunk_size(chunk_size)
 	chunk.set_max_height(max_height)
 	chunk.set_material(material)
-	chunk.translate(Vector3(chunk_pos.x,0.0,chunk_pos.y))
+	chunk.set_chunk_pos(chunk_pos)
 	return chunk
 
 func _recreate_chunks():
 	for chunk in get_children():
-		if chunk == null: continue
-		remove_child(chunk)
-		chunk.remove_and_skip()
-	chunks.clear()
+		_on_chunk_destroy(chunk)
 	_create_chunks()
 
 func _update_children():
@@ -76,6 +73,18 @@ func _create_chunk(chunk_pos):
 func _add_chunk(chunk):
 	add_child(chunk)
 	chunk.set_car(car)
+	chunk.connect("destroy", self, "_on_chunk_destroy", [], CONNECT_ONESHOT | CONNECT_DEFERRED)
+
+func _on_chunk_destroy(chunk):
+	var chunk_pos = chunk.get_chunk_pos()
+	if chunk_pos == null:
+		chunk_pos = Vector2(chunk.global_tranform.origin.x, chunk.global_tranform.origin.z)
+	if chunks.has(chunk_pos):
+		chunks_mutex.lock()
+		chunks.erase(chunk_pos)
+		chunks_mutex.unlock()
+		remove_child(chunk)
+		chunk.free()
 
 var chunk_creator_semaphore = Semaphore.new()
 var chunk_creator_mutex = Mutex.new()
@@ -117,7 +126,7 @@ func _ready():
 		call_deferred("_recreate_chunks")
 	else:
 		car = get_node(car_node)
-		call_deferred("_create_chunks")
+		call_deferred("update_chunk_pos")
 		call_deferred("run_chunk_creator_thread")
 
 func run_chunk_creator_thread():
@@ -133,6 +142,8 @@ func _exit_tree():
 	chunk_creator_semaphore.post()
 	if chunk_creator_thread != null:
 		chunk_creator_thread.wait_to_finish()
+	if Engine.editor_hint:
+		ground_noise.disconnect("changed", self, "_recreate_chunks")
 
 func _physics_process(delta):
 	if not Engine.editor_hint:
