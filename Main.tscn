@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Ground.gd" type="Script" id=1]
-[ext_resource path="res://GroundChunkManager.gd" type="Script" id=2]
-[ext_resource path="res://GroundChunk.tscn" type="PackedScene" id=3]
-[ext_resource path="res://Materials/Ground.tres" type="Material" id=4]
+[ext_resource path="res://GroundChunk.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Materials/Ground.tres" type="Material" id=3]
+[ext_resource path="res://GroundChunkManager.gd" type="Script" id=4]
 [ext_resource path="res://groundnoise.tres" type="OpenSimplexNoise" id=5]
 [ext_resource path="res://Camera.gd" type="Script" id=6]
 [ext_resource path="res://Environment.tres" type="Environment" id=7]
@@ -13,14 +13,18 @@
 
 [node name="Ground" type="Spatial" parent="."]
 script = ExtResource( 1 )
+GroundChunk = ExtResource( 2 )
+material = ExtResource( 3 )
+chunk_radius_game = 3
 chunk_radius_editor = 1
 car_node = NodePath("../Car")
 
 [node name="GroundChunkManager" type="Spatial" parent="Ground"]
-script = ExtResource( 2 )
-GroundChunk = ExtResource( 3 )
-material = ExtResource( 4 )
+script = ExtResource( 4 )
 ground_noise = ExtResource( 5 )
+chunk_size = 24
+max_height = 12.0
+thread_count = 2
 
 [node name="GroundChunks" type="Spatial" parent="Ground"]
 
@@ -43,3 +47,4 @@ shadow_bias = 0.0
 shadow_reverse_cull_face = true
 
 [node name="Car" parent="." instance=ExtResource( 8 )]
+MAX_ENGINE_FORCE = 800.0
