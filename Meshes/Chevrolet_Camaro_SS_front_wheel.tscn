@@ -1,0 +1,13 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://assets/Chevrolet_Camaro_SS_front_wheel.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://Materials/Tire.tres" type="Material" id=2]
+[ext_resource path="res://Materials/Brakedisc.tres" type="Material" id=3]
+[ext_resource path="res://Materials/Chrome.tres" type="Material" id=4]
+
+[node name="Chevrolet_Camaro_SS_front_wheel" type="MeshInstance"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0 )
+mesh = ExtResource( 1 )
+material/0 = ExtResource( 2 )
+material/1 = ExtResource( 3 )
+material/2 = ExtResource( 4 )

@@ -1,6 +1,6 @@
 extends VehicleBody
 
-signal car_moved
+signal moved
 
 ############################################################
 # behaviour values
@@ -28,6 +28,8 @@ func _ready():
 	# Called every time the node is added to the scene.
 	# Initialization here
 	pass
+
+onready var old_pos = global_transform.origin
 
 func _physics_process(delta):
 	var steer_val = steering_mult * Input.get_joy_axis(0, joy_steering)
@@ -59,6 +61,7 @@ func _physics_process(delta):
 			steer_angle = steer_target
 	
 	steering = steer_angle
-
-func _process(delta):
-	emit_signal("car_moved", global_transform.origin)
+	
+	if old_pos.distance_to(global_transform.origin) > 0.1:
+		old_pos = global_transform.origin
+		emit_signal("moved", global_transform.origin)

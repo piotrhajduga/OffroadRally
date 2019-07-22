@@ -1,57 +1,60 @@
 tool
 extends StaticBody
 
-signal destroy
+signal remove
+
+func _update():
+	_create_lods()
+	call_deferred("_set_children")
 
 export(Material) var material setget set_material
 
 func set_material(material_in):
 	material = material_in
-	if Engine.editor_hint:
-		call_deferred("_update_material")
-
-func _update_material():
-	$HighLOD.material_override = material
-	$MediumLOD.material_override = material
-	$LowLOD.material_override = material
+	if Engine.editor_hint: call_deferred("_update")
 
 export(OpenSimplexNoise) var noise setget set_noise
 
 func set_noise(noise_in):
 	noise = noise_in
-	if Engine.editor_hint:
-		call_deferred("_update")
-		if !noise.is_connected("changed", self, "_update"):
-			noise.connect("changed", self, "_update", [], CONNECT_DEFERRED)
+	if Engine.editor_hint: call_deferred("_update")
 
 export(float) var noise_scale = 1.0 setget set_noise_scale
 
 func set_noise_scale(noise_scale_in):
 	noise_scale = noise_scale_in
-	if Engine.editor_hint:
-		call_deferred("_update")
+	if Engine.editor_hint: call_deferred("_update")
 
 export var chunk_size = 16 setget set_chunk_size
 
 func set_chunk_size(chunk_size_in):
 	chunk_size = chunk_size_in
-	if Engine.editor_hint:
-		call_deferred("_update")
+	if Engine.editor_hint: call_deferred("_update")
 
 export var max_height = 8 setget set_max_height
 
 func set_max_height(max_height_in):
 	max_height = max_height_in
-	if Engine.editor_hint:
-		call_deferred("_update")
+	if Engine.editor_hint: call_deferred("_update")
 
 enum LOD {HIGH,MEDIUM,LOW}
 export (LOD) var lod = LOD.HIGH setget set_lod
 
 func set_lod(lod_in):
 	lod = lod_in
-	if Engine.editor_hint:
-		call_deferred("update_chunk")
+	match lod:
+		LOD.HIGH:
+			$HighLOD.set_visible(true)
+			$MediumLOD.set_visible(false)
+			$LowLOD.set_visible(false)
+		LOD.MEDIUM:
+			$HighLOD.set_visible(false)
+			$MediumLOD.set_visible(true)
+			$LowLOD.set_visible(false)
+		LOD.LOW:
+			$HighLOD.set_visible(false)
+			$MediumLOD.set_visible(false)
+			$LowLOD.set_visible(true)
 
 const MARGIN = Vector2(0.1,0.1)
 
@@ -59,25 +62,21 @@ export var collision = true setget set_collision
 
 func set_collision(collision_in):
 	collision = collision_in
-	if Engine.editor_hint:
-		call_deferred("update_chunk")
+	$CollisionShape.set_disabled(!collision)
+	$CollisionShape.set_visible(collision)
 
 var car : Node setget set_car
 
 func set_car(car_node):
 	car = car_node
 	if !Engine.editor_hint and car != null:
-		car.connect("car_moved", self, "_on_car_moved")
+		car.connect("moved", self, "_on_car_moved")
 		call_deferred("_on_car_moved", car.global_transform.origin)
 
 var chunk_pos : Vector2 setget set_chunk_pos, get_chunk_pos
 
 func set_chunk_pos(new_pos : Vector2):
-	if new_pos == null:
-		return
 	chunk_pos = new_pos
-	if Engine.editor_hint:
-		call_deferred("_update")
 
 func get_chunk_pos():
 	return chunk_pos
@@ -92,57 +91,41 @@ func _on_car_moved(new_pos : Vector3):
 	elif distance < chunk_size*5:
 		lod = LOD.LOW
 	elif distance > chunk_size*6:
-		emit_signal("destroy", self)
+		emit_signal("remove", self)
 	set_lod(lod)
 	set_collision(distance < chunk_size)
 	set_visible(distance < chunk_size*5)
-	call_deferred("update_chunk")
+
+var lod_meshes = {}
+var collision_shape : Shape
 
 # Called when the node enters the scene tree for the first time.
-
-var lmb : LodMeshBuilder
-
 func _ready():
-	if Engine.editor_hint:
-		call_deferred("_update")
-	else:
-		_update()
-
-func _exit_tree():
-	if Engine.editor_hint and noise != null:
-		noise.disconnect("changed", self, "_update")
-
-func _update():
 	global_transform.origin = Vector3(chunk_pos.x, 0, chunk_pos.y)
-	lmb = LodMeshBuilder.new(chunk_size, noise, noise_scale, max_height)
-	create_lods()
-	_update_material()
-	update_chunk()
+	_create_lods()
+	call_deferred("_set_children")
 
-func update_chunk():
-	match lod:
-		LOD.HIGH:
-			$HighLOD.set_visible(true)
-			$MediumLOD.set_visible(false)
-			$LowLOD.set_visible(false)
-		LOD.MEDIUM:
-			$HighLOD.set_visible(false)
-			$MediumLOD.set_visible(true)
-			$LowLOD.set_visible(false)
-		LOD.LOW:
-			$HighLOD.set_visible(false)
-			$MediumLOD.set_visible(false)
-			$LowLOD.set_visible(true)
-	$CollisionShape.set_disabled(!collision)
-	$CollisionShape.set_visible(collision)
+func _set_children():
+	$CollisionShape.set_shape(collision_shape)
+	$HighLOD.set_mesh(lod_meshes[LOD.HIGH])
+	$MediumLOD.set_mesh(lod_meshes[LOD.MEDIUM])
+	$LowLOD.set_mesh(lod_meshes[LOD.LOW])
+	$HighLOD.material_override = material
+	$MediumLOD.material_override = material
+	$LowLOD.material_override = material
 
-func create_lods():
+func _remove():
+	emit_signal("remove", self)
+	get_parent_spatial().remove_child(self)
+	queue_free()
+
+func _create_lods():
+	var lmb = LodMeshBuilder.new(chunk_size, noise, noise_scale, max_height)
 	var origin = Vector3(chunk_pos.x, 0, chunk_pos.y)
-	var mesh = lmb.build(origin, 2)
-	$HighLOD.set_mesh(lmb.build(origin, 1))
-	$MediumLOD.set_mesh(mesh)
-	$LowLOD.set_mesh(lmb.build(origin, 4))
-	$CollisionShape.set_shape(mesh.create_trimesh_shape())
+	lod_meshes[LOD.HIGH] = lmb.build(origin, 3)
+	lod_meshes[LOD.MEDIUM] = lmb.build(origin, 6)
+	lod_meshes[LOD.LOW] = lmb.build(origin, 12)
+	collision_shape = lod_meshes[LOD.MEDIUM].create_trimesh_shape()
 
 class LodMeshBuilder:
 	var chunk_size : float

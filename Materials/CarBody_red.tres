@@ -1,0 +1,11 @@
+[gd_resource type="SpatialMaterial" format=2]
+
+[resource]
+resource_name = "Doors"
+albedo_color = Color( 0.64, 0.132781, 0.111726, 1 )
+metallic = 0.75
+metallic_specular = 0.6
+roughness = 0.15
+clearcoat_enabled = true
+clearcoat = 1.0
+clearcoat_gloss = 1.0

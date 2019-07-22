@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Ground.gd" type="Script" id=1]
+[ext_resource path="res://GroundChunkManager.gd" type="Script" id=2]
+[ext_resource path="res://GroundChunk.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Materials/Ground.tres" type="Material" id=4]
+[ext_resource path="res://groundnoise.tres" type="OpenSimplexNoise" id=5]
+
+[node name="Ground" type="Spatial"]
+script = ExtResource( 1 )
+car_node = NodePath("../Car")
+
+[node name="GroundChunkManager" type="Spatial" parent="."]
+script = ExtResource( 2 )
+GroundChunk = ExtResource( 3 )
+material = ExtResource( 4 )
+ground_noise = ExtResource( 5 )
+max_height = 16.0
+
+[node name="GroundChunks" type="Spatial" parent="."]
