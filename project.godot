@@ -31,4 +31,4 @@ quality/shading/force_vertex_shading=true
 quality/shading/force_lambert_over_burley=true
 quality/shading/force_blinn_over_ggx=true
 quality/subsurface_scattering/quality=0
-environment/default_environment="res://default_env.tres"
+environment/default_environment="res://Environments/Default.tres"

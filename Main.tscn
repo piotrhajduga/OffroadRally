@@ -1,12 +1,12 @@
 [gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://Ground.gd" type="Script" id=1]
+[ext_resource path="res://Scripts/Ground.gd" type="Script" id=1]
 [ext_resource path="res://GroundChunk.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Materials/Ground.tres" type="Material" id=3]
-[ext_resource path="res://GroundChunkManager.gd" type="Script" id=4]
-[ext_resource path="res://groundnoise.tres" type="OpenSimplexNoise" id=5]
-[ext_resource path="res://Camera.gd" type="Script" id=6]
-[ext_resource path="res://Environment.tres" type="Environment" id=7]
+[ext_resource path="res://Scripts/GroundChunkManager.gd" type="Script" id=4]
+[ext_resource path="res://GroundNoise.tres" type="OpenSimplexNoise" id=5]
+[ext_resource path="res://Scripts/Camera.gd" type="Script" id=6]
+[ext_resource path="res://Environments/Environment.tres" type="Environment" id=7]
 [ext_resource path="res://Car.tscn" type="PackedScene" id=8]
 
 [node name="Spatial" type="Spatial"]

@@ -1,7 +1,7 @@
 tool
 extends Node
 
-var GroundChunk = preload("res://GroundChunk.gd")
+var GroundChunkClass = preload("res://Scripts/GroundChunk.gd")
 
 signal updated
 signal queue_empty
@@ -107,9 +107,9 @@ func _chunk_creator_thread(userdata):
 func _create_chunk_data(chunk_pos):
 	var lmb = LodMeshBuilder.new(chunk_size, ground_noise, ground_noise_scale, max_height)
 	var chunk_data = {}
-	chunk_data[GroundChunk.LOD.HIGH] = lmb.build(chunk_pos, 3)
-	chunk_data[GroundChunk.LOD.MEDIUM] = lmb.build(chunk_pos, 6)
-	chunk_data[GroundChunk.LOD.LOW] = lmb.build(chunk_pos, 12)
+	chunk_data[GroundChunkClass.LOD.HIGH] = lmb.build(chunk_pos, 3)
+	chunk_data[GroundChunkClass.LOD.MEDIUM] = lmb.build(chunk_pos, 6)
+	chunk_data[GroundChunkClass.LOD.LOW] = lmb.build(chunk_pos, 12)
 	return chunk_data
 
 func _remove_chunk(chunk_pos):
